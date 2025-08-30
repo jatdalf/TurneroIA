@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistema de Turnos para Proveedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style id="app-style">
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        .login-bg {
+            background-image: url('https://cdn.pixabay.com/photo/2018/03/10/09/45/businessman-3213659_1280.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .auth-form {
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .file-upload-container {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-container:hover, .file-upload-container.dragging {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .file-preview {
+            max-height: 200px;
+            object-fit: contain;
+        }
+        
+        @media (max-width: 640px) {
+            .mobile-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .mobile-menu.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Login Page -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center login-bg">
+        <div class="max-w-md w-full mx-4">
+            <div class="auth-form rounded-lg shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-navy-700">Sistema de Turnos</h1>
+                    <p class="text-gray-600">Inicie sesión para gestionar sus entregas</p>
+                </div>
+                
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+                        <input type="email" id="email" name="email" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <input type="password" id="password" name="password" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Setup Page -->
+    <div id="profile-setup-page" class="min-h-screen flex items-center justify-center bg-gray-100 hidden">
+        <div class="max-w-md w-full mx-4">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-navy-700">Complete su perfil</h1>
+                    <p class="text-gray-600">Necesitamos algunos datos adicionales antes de continuar</p>
+                </div>
+                
+                <form id="profile-setup-form" class="space-y-6">
+                    <div>
+                        <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre completo</label>
+                        <input type="text" id="nombre" name="nombre" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="empresa" class="block text-sm font-medium text-gray-700">Nombre de la empresa</label>
+                        <input type="text" id="empresa" name="empresa" required 
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Guardar y Continuar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Layout -->
+    <div id="app-layout" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation Header -->
+        <header class="bg-white shadow">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-bold text-indigo-800">Sistema de Turnos</h1>
+                    </div>
+                    
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden sm:flex space-x-6">
+                        <a href="javascript:void(0)" class="nav-link" data-page="submit-turn">Solicitar Turno</a>
+                        <a href="javascript:void(0)" class="nav-link" data-page="view-submissions">Ver Solicitudes</a>
+                        <a href="javascript:void(0)" class="nav-link" data-page="profile">Perfil</a>
+                        <a href="javascript:void(0)" id="logout-link" class="text-red-600">Cerrar Sesión</a>
+                    </nav>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-button" class="sm:hidden text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="mobile-menu bg-white shadow-lg sm:hidden">
+            <div class="px-4 py-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-bold text-indigo-800">Menú</h2>
+                    <button id="close-mobile-menu" class="text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <nav class="flex flex-col space-y-4">
+                    <a href="javascript:void(0)" class="nav-link px-4 py-2 rounded hover:bg-gray-100" data-page="submit-turn">Solicitar Turno</a>
+                    <a href="javascript:void(0)" class="nav-link px-4 py-2 rounded hover:bg-gray-100" data-page="view-submissions">Ver Solicitudes</a>
+                    <a href="javascript:void(0)" class="nav-link px-4 py-2 rounded hover:bg-gray-100" data-page="profile">Perfil</a>
+                    <a href="javascript:void(0)" id="mobile-logout-link" class="px-4 py-2 rounded hover:bg-gray-100 text-red-600">Cerrar Sesión</a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content Container -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Submit Turn Page -->
+            <div id="submit-turn-page" class="page-content">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Solicitar Turno de Entrega</h2>
+                    
+                    <form id="submit-turn-form" class="space-y-6">
+                        <div>
+                            <label for="order-number" class="block text-sm font-medium text-gray-700">Número de Orden de Compra</label>
+                            <input type="text" id="order-number" name="orderNumber" required 
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="volume" class="block text-sm font-medium text-gray-700">Volumen del Material (m³)</label>
+                            <input type="number" id="volume" name="volume" min="0.01" step="0.01" required 
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Imagen del Remito</label>
+                            <div id="file-upload-container" class="file-upload-container rounded-lg p-6 text-center">
+                                <input type="file" id="remito-file" name="remito" accept="image/*" class="hidden" required>
+                                <div id="upload-prompt">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-gray-600">Arrastre y suelte la imagen aquí o</p>
+                                    <button type="button" id="select-file-btn" class="mt-2 py-1 px-3 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none">
+                                        Seleccionar archivo
+                                    </button>
+                                    <p class="mt-2 text-xs text-gray-500">Máximo 25MB. Formatos: JPG, PNG, PDF</p>
+                                </div>
+                                <div id="file-preview-container" class="hidden mt-4">
+                                    <img id="file-preview" class="file-preview mx-auto mb-2" src="" alt="Vista previa del remito">
+                                    <p id="file-name" class="text-sm text-gray-600"></p>
+                                    <button type="button" id="remove-file-btn" class="mt-2 py-1 px-3 bg-red-100 text-red-700 rounded hover:bg-red-200 focus:outline-none">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <button type="submit" class="w-full sm:w-auto flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span id="submit-button-text">Enviar Solicitud</span>
+                                <span id="submit-spinner" class="hidden ml-2">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- View Submissions Page -->
+            <div id="view-submissions-page" class="page-content hidden">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Mis Solicitudes de Turno</h2>
+                    
+                    <div id="submissions-container" class="space-y-6">
+                        <!-- Submissions will be loaded here -->
+                        <div class="text-center py-12">
+                            <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">No tiene solicitudes registradas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Page -->
+            <div id="profile-page" class="page-content hidden">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Mi Perfil</h2>
+                    
+                    <form id="profile-form" class="space-y-6">
+                        <div>
+                            <label for="profile-nombre" class="block text-sm font-medium text-gray-700">Nombre completo</label>
+                            <input type="text" id="profile-nombre" name="nombre" required 
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="profile-empresa" class="block text-sm font-medium text-gray-700">Nombre de la empresa</label>
+                            <input type="text" id="profile-empresa" name="empresa" required 
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="profile-email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+                            <input type="email" id="profile-email" name="email" disabled 
+                                class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-4">
+            <div class="container mx-auto px-4 text-center">
+                <p>Sistema de Turnos para Proveedores &copy; 2025</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transition-all transform translate-y-full opacity-0 flex items-center">
+        <div id="toast-icon" class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3">
+            <i id="toast-icon-symbol" class="fas"></i>
+        </div>
+        <div>
+            <h4 id="toast-title" class="font-medium"></h4>
+            <p id="toast-message" class="text-sm text-gray-600"></p>
+        </div>
+    </div>
+    
+    <script id="app-script">
+        // Utility functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            const pageToShow = document.getElementById(pageId);
+            if (pageToShow) {
+                pageToShow.classList.remove('hidden');
+            }
+        }
+        
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastIconSymbol = document.getElementById('toast-icon-symbol');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Reset classes
+            toastIcon.classList.remove('bg-green-100', 'text-green-500', 'bg-red-100', 'text-red-500', 'bg-blue-100', 'text-blue-500');
+            toastIconSymbol.classList.remove('fa-check-circle', 'fa-exclamation-circle', 'fa-info-circle');
+            
+            // Set appropriate classes based on type
+            if (type === 'success') {
+                toastIcon.classList.add('bg-green-100', 'text-green-500');
+                toastIconSymbol.classList.add('fa-check-circle');
+            } else if (type === 'error') {
+                toastIcon.classList.add('bg-red-100', 'text-red-500');
+                toastIconSymbol.classList.add('fa-exclamation-circle');
+            } else if (type === 'info') {
+                toastIcon.classList.add('bg-blue-100', 'text-blue-500');
+                toastIconSymbol.classList.add('fa-info-circle');
+            }
+            
+            // Show toast
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+        
+        // User data management
+        let currentUser = null;
+        
+        function loadUserFromLocalStorage() {
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+                return true;
+            }
+            return false;
+        }
+        
+        function saveUserToLocalStorage(user) {
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+        
+        // Navigation
+        function setupNavigation() {
+            // Handle navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const targetPage = e.target.dataset.page;
+                    showPage(targetPage + '-page');
+                    
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    mobileMenu.classList.remove('active');
+                });
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                mobileMenu.classList.add('active');
+            });
+            
+            document.getElementById('close-mobile-menu').addEventListener('click', () => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                mobileMenu.classList.remove('active');
+            });
+            
+            // Logout handlers
+            document.getElementById('logout-link').addEventListener('click', handleLogout);
+            document.getElementById('mobile-logout-link').addEventListener('click', handleLogout);
+        }
+        
+        function handleLogout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('submissions');
+            currentUser = null;
+            showLoginPage();
+        }
+        
+        // Show appropriate starting page
+        function initializeApp() {
+            if (loadUserFromLocalStorage()) {
+                // User is logged in
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                
+                // Fill profile info
+                document.getElementById('profile-nombre').value = currentUser.nombre || '';
+                document.getElementById('profile-empresa').value = currentUser.empresa || '';
+                document.getElementById('profile-email').value = currentUser.email || '';
+                
+                showPage('submit-turn-page');
+                loadSubmissions();
+            } else {
+                // No user, show login
+                showLoginPage();
+            }
+        }
+        
+        function showLoginPage() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('profile-setup-page').classList.add('hidden');
+            document.getElementById('app-layout').classList.add('hidden');
+        }
+        
+        // Login form handling
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // This is a prototype, so we'll accept any login
+            // In a real app, this would validate against an API
+            
+            // Check if this user has a profile
+            const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
+            
+            if (existingUsers[email]) {
+                // User exists, log them in
+                saveUserToLocalStorage(existingUsers[email]);
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                showPage('submit-turn-page');
+            } else {
+                // New user, show profile setup
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('profile-setup-page').classList.remove('hidden');
+                
+                // Store email temporarily
+                sessionStorage.setItem('pendingUserEmail', email);
+            }
+        });
+        
+        // Profile setup form handling
+        document.getElementById('profile-setup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value;
+            const empresa = document.getElementById('empresa').value;
+            const email = sessionStorage.getItem('pendingUserEmail');
+            
+            // Create user profile
+            const user = { email, nombre, empresa };
+            
+            // Save to "database"
+            const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
+            existingUsers[email] = user;
+            localStorage.setItem('users', JSON.stringify(existingUsers));
+            
+            // Log user in
+            saveUserToLocalStorage(user);
+            
+            // Clean up temporary storage
+            sessionStorage.removeItem('pendingUserEmail');
+            
+            // Show main app
+            document.getElementById('profile-setup-page').classList.add('hidden');
+            document.getElementById('app-layout').classList.remove('hidden');
+            showPage('submit-turn-page');
+        });
+        
+        // Profile form handling
+        document.getElementById('profile-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('profile-nombre').value;
+            const empresa = document.getElementById('profile-empresa').value;
+            
+            // Update current user
+            currentUser.nombre = nombre;
+            currentUser.empresa = empresa;
+            
+            // Update in "database"
+            const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
+            existingUsers[currentUser.email] = currentUser;
+            localStorage.setItem('users', JSON.stringify(existingUsers));
+            
+            // Update in localStorage
+            saveUserToLocalStorage(currentUser);
+            
+            showToast('Perfil actualizado', 'Sus datos han sido actualizados correctamente.');
+        });
+        
+        // File upload handling
+        function setupFileUpload() {
+            const fileInput = document.getElementById('remito-file');
+            const selectFileBtn = document.getElementById('select-file-btn');
+            const uploadContainer = document.getElementById('file-upload-container');
+            const uploadPrompt = document.getElementById('upload-prompt');
+            const previewContainer = document.getElementById('file-preview-container');
+            const filePreview = document.getElementById('file-preview');
+            const fileName = document.getElementById('file-name');
+            const removeFileBtn = document.getElementById('remove-file-btn');
+            
+            selectFileBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileSelection);
+            
+            function handleFileSelection() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    
+                    // Check file size (max 25MB)
+                    if (file.size > 25 * 1024 * 1024) {
+                        showToast('Error', 'El archivo es demasiado grande. Máximo 25MB.', 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        filePreview.src = e.target.result;
+                        fileName.textContent = file.name;
+                        uploadPrompt.classList.add('hidden');
+                        previewContainer.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            removeFileBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                previewContainer.classList.add('hidden');
+                uploadPrompt.classList.remove('hidden');
+            });
+            
+            // Drag and drop functionality
+            uploadContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadContainer.classList.add('dragging');
+            });
+            
+            uploadContainer.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadContainer.classList.remove('dragging');
+            });
+            
+            uploadContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadContainer.classList.remove('dragging');
+                
+                const dt = e.dataTransfer;
+                fileInput.files = dt.files;
+                handleFileSelection();
+            });
+        }
+        
+        // Submit turn form handling
+        document.getElementById('submit-turn-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const orderNumber = document.getElementById('order-number').value;
+            const volume = document.getElementById('volume').value;
+            const fileInput = document.getElementById('remito-file');
+
+            try {
+                // 1) Upload remito image to Loop
+                const loopId = 'b7edb8f0-d2cf-4cd6-b753-f89e498c1089';
+                const imageUrl = await uploadFileToLoop(fileInput.files[0], loopId);
+
+                // 2) Save submission locally as before
+                const submission = {
+                    id: Date.now().toString(),
+                    orderNumber,
+                    volume,
+                    timestamp: new Date().toISOString(),
+                    status: 'pendiente',
+                    remitoFileName: fileInput.files[0].name,
+                    remitoImage: imageUrl   // store the uploaded URL instead of DataURL
+                };
+                saveSubmission(submission);
+
+                // 3) Call the SupplierSubmissionNotifier Loop
+                const payload = {
+                    supplierName: currentUser.nombre,
+                    company: currentUser.empresa,
+                    orderNumber: submission.orderNumber,
+                    volume: Number(submission.volume),
+                    imageUrl: imageUrl,
+                    timestamp: submission.timestamp
+                };
+                const loopRes = await fetch(`https://magicloops.dev/api/loop/${loopId}/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!loopRes.ok) throw new Error(`Loop run failed: ${loopRes.status}`);
+                await loopRes.json();
+
+                // 4) Clear form & show success
+                e.target.reset();
+                document.getElementById('file-preview-container').classList.add('hidden');
+                document.getElementById('upload-prompt').classList.remove('hidden');
+
+                showToast('Turno solicitado', 'Su solicitud ha sido registrada correctamente');
+                showPage('view-submissions-page');
+                loadSubmissions();
+
+            } catch (error) {
+                console.error(error);
+                showToast('Error', error.message || 'Hubo un problema al enviar su solicitud', 'error');
+            } finally {
+                // reset button state unchanged ...
+            }
+        });
+        
+        // ADD: helper to upload a single file to MagicLoops
+        async function uploadFileToLoop(file, loopId) {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch(`https://magicloops.dev/api/loop/${loopId}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error('File upload failed');
+            const json = await res.json(); // { url, fileName, type }
+            return json.url;
+        }
+
+        // Submissions management
+        function saveSubmission(submission) {
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            submissions.push(submission);
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+        }
+        
+        function loadSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            const container = document.getElementById('submissions-container');
+            
+            if (submissions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No tiene solicitudes registradas</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort submissions by timestamp (newest first)
+            submissions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Build submissions list
+            container.innerHTML = '';
+            submissions.forEach(submission => {
+                const date = new Date(submission.timestamp);
+                const formattedDate = date.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const statusClass = submission.status === 'pendiente' 
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800';
+                
+                const card = document.createElement('div');
+                card.className = 'bg-gray-50 rounded-lg p-4 shadow';
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between">
+                        <div>
+                            <h3 class="font-medium">Orden: ${submission.orderNumber}</h3>
+                            <p class="text-gray-600 text-sm">Volumen: ${submission.volume} m³</p>
+                            <p class="text-gray-500 text-xs mt-1">${formattedDate}</p>
+                        </div>
+                        <div class="flex items-center mt-3 sm:mt-0">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
+                                ${submission.status === 'pendiente' ? 'Pendiente' : 'Aprobado'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="text-sm font-medium text-gray-700 mb-1">Remito:</div>
+                        <div class="bg-white border rounded p-2 flex items-center">
+                            <img src="${submission.remitoImage}" class="h-16 object-contain mr-3" alt="Imagen del remito">
+                            <div>
+                                <p class="text-xs text-gray-600">${submission.remitoFileName}</p>
+                                <a href="${submission.remitoImage}" target="_blank" class="text-blue-600 text-xs hover:underline">Ver imagen</a>
+                            </div>
+                        </div>
+                    </div>
+                    ${submission.status === 'pendiente' ? `
+                    <div class="mt-4 flex space-x-2">
+                        <button class="edit-submission-btn text-blue-600 hover:text-blue-800 text-sm flex items-center" data-id="${submission.id}">
+                            <i class="fas fa-edit mr-1"></i> Editar
+                        </button>
+                        <button class="delete-submission-btn text-red-600 hover:text-red-800 text-sm flex items-center" data-id="${submission.id}">
+                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+                
+                // Add event listeners to the buttons we just created
+                const editButton = card.querySelector('.edit-submission-btn');
+                const deleteButton = card.querySelector('.delete-submission-btn');
+                
+                if (editButton) {
+                    editButton.addEventListener('click', () => {
+                        // TODO: Implement edit functionality
+                        showToast('Información', 'La funcionalidad de edición estará disponible próximamente', 'info');
+                    });
+                }
+                
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', () => {
+                        // Remove submission
+                        const updatedSubmissions = submissions.filter(s => s.id !== submission.id);
+                        localStorage.setItem('submissions', JSON.stringify(updatedSubmissions));
+                        
+                        // Reload submissions list
+                        loadSubmissions();
+                        
+                        showToast('Solicitud eliminada', 'La solicitud ha sido eliminada correctamente');
+                    });
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            setupNavigation();
+            setupFileUpload();
+        });
+    </script>
+</body>
+</html>
