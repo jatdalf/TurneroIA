@@ -1,38 +1,45 @@
-.App {
-  text-align: center;
-}
+@import 'tailwindcss/tailwind.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.transition-all {
+    transition: all 0.3s ease;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.login-bg {
+    background-image: url('https://cdn.pixabay.com/photo/2018/03/10/09/45/businessman-3213659_1280.jpg');
+    background-size: cover;
+    background-position: center;
 }
-
-.App-link {
-  color: #61dafb;
+.auth-form {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.9);
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.file-upload-container {
+    border: 2px dashed #cbd5e1;
+    transition: all 0.3s ease;
+}
+.file-upload-container:hover, .file-upload-container.dragging {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+}
+.file-preview {
+    max-height: 200px;
+    object-fit: contain;
+}
+@media (max-width: 640px) {
+    .mobile-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    .mobile-menu.active {
+        transform: translateX(0);
+    }
 }

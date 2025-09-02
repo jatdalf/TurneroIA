@@ -1,12 +1,57 @@
 import React from "react";
+import styles from './ProfilePage.module.css';
 
 const ProfilePage: React.FC<{ user: any; onSave: (data: any) => void }> = ({ user, onSave }) => {
-  // Puedes manejar el formulario y los valores aquí
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const nombre = (form.elements.namedItem("nombre") as HTMLInputElement).value;
+    const empresa = (form.elements.namedItem("empresa") as HTMLInputElement).value;
+    onSave({ nombre, empresa });
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Mi Perfil</h2>
-      <form className="space-y-6" onSubmit={e => { e.preventDefault(); /* Lógica aquí */ }}>
-        {/* ...inputs... */}
+    <div className={styles.profileContainer}>
+      <h2 className={styles.title}>Mi Perfil</h2>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="profile-nombre" className={styles.label}>Nombre completo</label>
+          <input
+            type="text"
+            id="profile-nombre"
+            name="nombre"
+            required
+            className={styles.input}
+            defaultValue={user?.nombre || ""}
+          />
+        </div>
+        <div>
+          <label htmlFor="profile-empresa" className={styles.label}>Nombre de la empresa</label>
+          <input
+            type="text"
+            id="profile-empresa"
+            name="empresa"
+            required
+            className={styles.input}
+            defaultValue={user?.empresa || ""}
+          />
+        </div>
+        <div>
+          <label htmlFor="profile-email" className={styles.label}>Correo electrónico</label>
+          <input
+            type="email"
+            id="profile-email"
+            name="email"
+            disabled
+            className={styles.input}
+            defaultValue={user?.email || ""}
+          />
+        </div>
+        <div>
+          <button type="submit" className={styles.button}>
+            Guardar Cambios
+          </button>
+        </div>
       </form>
     </div>
   );

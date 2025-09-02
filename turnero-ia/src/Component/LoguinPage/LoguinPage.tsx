@@ -1,4 +1,5 @@
 import React from "react";
+import styles from './LoguinPage.module.css';
 
 const LoginPage: React.FC<{ onLogin: (email: string, password: string) => void }> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -10,30 +11,30 @@ const LoginPage: React.FC<{ onLogin: (email: string, password: string) => void }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center login-bg">
-      <div className="max-w-md w-full mx-4">
-        <div className="auth-form rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-navy-700">Sistema de Turnos</h1>
-            <p className="text-gray-600">Inicie sesión para gestionar sus entregas</p>
-          </div>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-              <input type="email" id="email" name="email" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
-              <input type="password" id="password" name="password" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-            <div>
-              <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Iniciar Sesión
-              </button>
-            </div>
-          </form>
+    <div className={styles.loginBg}>
+    <div className={styles.maxWidthMd}>
+        <div className={styles.authForm}>
+        <div className={styles.textCenter}>
+            <h1 className={styles.title}>Sistema de Turnos</h1>
+            <p className={styles.subtitle}>Inicie sesión para gestionar sus entregas</p>
         </div>
-      </div>
+        <form className={styles.form} onSubmit={handleSubmit}>
+            <div>
+            <label htmlFor="email" className={styles.label}>Correo electrónico</label>
+            <input type="email" id="email" name="email" required className={styles.input} />
+            </div>
+            <div>
+            <label htmlFor="password" className={styles.label}>Contraseña</label>
+            <input type="password" id="password" name="password" required className={styles.input} />
+            </div>
+            <div>
+            <button type="submit" className={styles.button}>
+                Iniciar Sesión
+            </button>
+            </div>
+        </form>
+        </div>
+    </div>
     </div>
   );
 };

@@ -1,15 +1,21 @@
 import React from "react";
+import styles from './Toast.module.css';
+
+const getIcon = (type: "success" | "error" | "info") => {
+  if (type === "success") return <i className="fas fa-check-circle"></i>;
+  if (type === "error") return <i className="fas fa-exclamation-circle"></i>;
+  return <i className="fas fa-info-circle"></i>;
+};
 
 const Toast: React.FC<{ title: string; message: string; type?: "success" | "error" | "info" }> = ({ title, message, type = "success" }) => {
-  // Puedes manejar la visibilidad y animación con estado
   return (
-    <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transition-all transform flex items-center">
-      <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-        {/* Icono según tipo */}
+    <div className={styles.toast}>
+      <div className={`${styles.icon} ${styles[type]}`}>
+        {getIcon(type)}
       </div>
       <div>
-        <h4 className="font-medium">{title}</h4>
-        <p className="text-sm text-gray-600">{message}</p>
+        <h4 className={styles.title}>{title}</h4>
+        <p className={styles.message}>{message}</p>
       </div>
     </div>
   );

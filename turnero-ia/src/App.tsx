@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import LoginPage from './Component/LoguinPage/LoguinPage';
@@ -8,10 +8,32 @@ import SubmitTurnPage from './Component/SubmitTurnPage/SubmitTurnPage';
 import ViewSubmissionsPage from './Component/ViewSubmissionsPage/ViewSubmissionsPage';
 import ProfilePage from './Component/ProfilePage/ProfilePage';
 
+function isProfileComplete(user: any) {
+  return user && user.nombre && user.empresa;
+}
+
 function App() {
-  // Estado simple para navegación y usuario (puedes mejorar con context)
   const [user, setUser] = useState<any>(null);
   const [profileComplete, setProfileComplete] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setProfileComplete(isProfileComplete(parsedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      setProfileComplete(isProfileComplete(user));
+    } else {
+      localStorage.removeItem('user');
+      setProfileComplete(false);
+    }
+  }, [user]);
 
   return (
     <div className="App">
@@ -20,14 +42,13 @@ function App() {
           <Route path="/" element={
             !user ? (
               <LoginPage onLogin={(email, password) => {
-                // Aquí lógica de login, setUser y setProfileComplete
-                setUser({ email }); setProfileComplete(false);
+                setUser({ email });
+                setProfileComplete(false);
               }} />
             ) : !profileComplete ? (
               <ProfileSetupPage onProfileComplete={(nombre, empresa) => {
-                // Aquí lógica de completar perfil
                 setUser((u: any) => ({ ...u, nombre, empresa }));
-                setProfileComplete(true);
+                // setProfileComplete(true); // Ya lo hace el useEffect
               }} />
             ) : (
               <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
@@ -36,19 +57,33 @@ function App() {
             )
           } />
           <Route path="/submit-turn" element={
-            <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
-              <SubmitTurnPage onSubmit={() => {}} />
-            </MainLayout>
+            profileComplete ? (
+              <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
+                <SubmitTurnPage onSubmit={() => {}} />
+              </MainLayout>
+            ) : (
+              <Navigate to="/" />
+            )
           } />
           <Route path="/view-submissions" element={
-            <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
-              <ViewSubmissionsPage />
-            </MainLayout>
+            profileComplete ? (
+              <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
+                <ViewSubmissionsPage />
+              </MainLayout>
+            ) : (
+              <Navigate to="/" />
+            )
           } />
           <Route path="/profile" element={
-            <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
-              <ProfilePage user={user} onSave={() => {}} />
-            </MainLayout>
+            profileComplete ? (
+              <MainLayout onLogout={() => { setUser(null); setProfileComplete(false); }}>
+                <ProfilePage user={user} onSave={(data) => {
+                  setUser((u: any) => ({ ...u, ...data }));
+                }} />
+              </MainLayout>
+            ) : (
+              <Navigate to="/" />
+            )
           } />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>

@@ -1,0 +1,88 @@
+.loginBg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('https://cdn.pixabay.com/photo/2018/03/10/09/45/businessman-3213659_1280.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.maxWidthMd {
+  max-width: 28rem; /* Tailwind's max-w-md */
+  width: 100%;
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.authForm {
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  padding: 2rem;
+}
+
+.textCenter {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #1e293b; /* text-navy-700 */
+}
+
+.subtitle {
+  color: #4b5563; /* text-gray-600 */
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.input {
+  margin-top: 0.25rem;
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  outline: none;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #6366f1;
+}
+
+.button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #4f46e5;
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  transition: background 0.2s;
+}
+
+.button:hover {
+  background-color: #4338ca;
+}
